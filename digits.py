@@ -104,9 +104,26 @@ def preprocess_hog(digits):
         samples.append(hist)
     return np.float32(samples)
 
+def generate_mosaic(directory):
+    digits = np.empty([0,SZ,SZ])
+    prefix = str(SZ)+'/cropped_img'
+    suffix = '.png'
+    for i in range(1,11):
+        for j in range(20,100):
+            infix= '%03d-%05d' % (i, j)
+            fname = directory+prefix+infix+suffix
+            img = cv2.imread(fname, 0)
+            digits = np.append(digits, np.array([img]),0)
+    cv2.imwrite('font'+str(SZ)+'.png', mosaic(20, digits))
 
 if __name__ == '__main__':
-    digits, labels = load_digits(DIGITS_FN)
+    generate_mosaic('cropped')
+    #digits, labels = load_digits(DIGITS_FN)
+    digits, labels = load_digits('font'+str(SZ)+'.png')
+    #fonts, fontlabels = load_digits('font.png')
+    #digits = np.concatenate((digits, fonts), axis=0)
+    #labels = np.concatenate((labels, fontlabels), axis=0)
+    print digits.shape, labels.shape
 
     print 'preprocessing...'
     # shuffle digits
@@ -125,23 +142,23 @@ if __name__ == '__main__':
     labels_train, labels_test = np.split(labels, [train_n])
 
 
-    #digits_img_test = cv2.imread('final.png', 0)
-    #digits_img_test = cv2.bitwise_not(digits_img_test)
-    #digits_test = split2d(digits_img_test, (25, 25))
-    #digits2_test = map(deskew, digits_test)
-    #samples_test = preprocess_hog(digits2_test)
-    #cv2.imshow('test set', mosaic(9, digits_test))
-    cv2.imshow('test set', mosaic(25, digits_test))
+    digits_img_test = cv2.imread('final'+str(SZ)+'.png', 0)
+    digits_img_test = cv2.bitwise_not(digits_img_test)
+    digits_test = split2d(digits_img_test, (SZ, SZ))
+    digits2_test = map(deskew, digits_test)
+    samples_test = preprocess_hog(digits2_test)
+    cv2.imshow('test set', mosaic(9, digits_test))
+    #cv2.imshow('test set', mosaic(25, digits_test))
 
     print 'training SVM...'
     model = SVM(C=2.67, gamma=5.383)
     model.train(samples_train, labels_train)
-    vis = evaluate_model(model, digits_test, samples_test, labels_test)
-    cv2.imshow('SVM test', vis)
-    #results = model.predict(samples_test)
+    #vis = evaluate_model(model, digits_test, samples_test, labels_test)
+    #cv2.imshow('SVM test', vis)
+    results = model.predict(samples_test)
     #print results
-    #for i in range(0,81,9):
-    #    print results[i:i+9]
+    for i in range(0,81,9):
+        print results[i:i+9]
     print 'saving SVM as "digits_svm.dat"...'
     model.save('digits_svm.dat')
 

@@ -104,7 +104,7 @@ for i in range(0,450,50):
     for j in range(0,450,50):
         #cv2.imshow('cell', output[i+2:i+48, j+2:j+48])
         temp = output[i+2:i+48, j+2:j+48]
-        temp = cv2.resize(temp,(25,25), interpolation = cv2.INTER_CUBIC)
+        temp = cv2.resize(temp,(20,20), interpolation = cv2.INTER_CUBIC)
         imglist.append(temp)
         #cv2.waitKey(0)
 from common import mosaic
