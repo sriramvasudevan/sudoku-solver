@@ -1,28 +1,3 @@
-#!/usr/bin/env python
-
-'''
-SVM and KNearest digit recognition.
-
-Sample loads a dataset of handwritten digits from 'digits.png'.
-Then it trains a SVM and KNearest classifiers on it and evaluates
-their accuracy.
-
-Following preprocessing is applied to the dataset:
- - Moment-based image deskew (see deskew())
- - Digit images are split into 4 10x10 cells and 16-bin
-   histogram of oriented gradients is computed for each
-   cell
- - Transform histograms to space with Hellinger metric (see [1] (RootSIFT))
-
-
-[1] R. Arandjelovic, A. Zisserman
-    "Three things everyone should know to improve object retrieval"
-    http://www.robots.ox.ac.uk/~vgg/publications/2012/Arandjelovic12/arandjelovic12.pdf
-
-Usage:
-   digits.py
-'''
-
 # built-in modules
 from multiprocessing.pool import ThreadPool
 
@@ -71,19 +46,6 @@ class StatModel(object):
     def save(self, fn):
         self.model.save(fn)
 
-class KNearest(StatModel):
-    def __init__(self, k = 3):
-        self.k = k
-        self.model = cv2.KNearest()
-
-    def train(self, samples, responses):
-        self.model = cv2.KNearest()
-        self.model.train(samples, responses)
-
-    def predict(self, samples):
-        retval, results, neigh_resp, dists = self.model.find_nearest(samples, self.k)
-        return results.ravel()
-
 class SVM(StatModel):
     def __init__(self, C = 1, gamma = 0.5):
         self.params = dict( kernel_type = cv2.SVM_RBF,
@@ -120,9 +82,6 @@ def evaluate_model(model, digits, samples, labels):
         vis.append(img)
     return mosaic(25, vis)
 
-def preprocess_simple(digits):
-    return np.float32(digits).reshape(-1, SZ*SZ) / 255.0
-
 def preprocess_hog(digits):
     samples = []
     for img in digits:
@@ -147,8 +106,6 @@ def preprocess_hog(digits):
 
 
 if __name__ == '__main__':
-    print __doc__
-
     digits, labels = load_digits(DIGITS_FN)
 
     print 'preprocessing...'
@@ -175,13 +132,6 @@ if __name__ == '__main__':
     #samples_test = preprocess_hog(digits2_test)
     #cv2.imshow('test set', mosaic(9, digits_test))
     cv2.imshow('test set', mosaic(25, digits_test))
-
-
-    #print 'training KNearest...'
-    #model = KNearest(k=4)
-    #model.train(samples_train, labels_train)
-    #vis = evaluate_model(model, digits_test, samples_test, labels_test)
-    #cv2.imshow('KNearest test', vis)
 
     print 'training SVM...'
     model = SVM(C=2.67, gamma=5.383)
