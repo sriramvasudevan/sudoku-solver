@@ -98,11 +98,19 @@ output = cv2.cvtColor(output,cv2.COLOR_BGR2GRAY)
 output = cv2.GaussianBlur(output,(5,5),0)
 output = cv2.adaptiveThreshold(output,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,3,2)
 t = time.clock()-start
+imglist = []
 print '(%.2f seconds)\n' % t
-#for i in range(0,450,50):
-#    for j in range(0,450,50):
-#        cv2.imshow('cell', output[i:i+50, j:j+50])
-#        cv2.waitKey(0)
+for i in range(0,450,50):
+    for j in range(0,450,50):
+        #cv2.imshow('cell', output[i+2:i+48, j+2:j+48])
+        temp = output[i+2:i+48, j+2:j+48]
+        temp = cv2.resize(temp,(25,25), interpolation = cv2.INTER_CUBIC)
+        imglist.append(temp)
+        #cv2.waitKey(0)
+from common import mosaic
+cv2.imwrite('final.png', mosaic(9, imglist))
+cv2.imshow('final', mosaic(9, imglist))
+cv2.waitKey(0)
 cv2.imwrite('output.png', output)
 cv2.imshow('img', output)
 cv2.waitKey(0)
